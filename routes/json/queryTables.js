@@ -14,25 +14,23 @@
 // limitations under the License.
 //
 
-var express = require('express')
-  , http = require('http')
-  , path = require('path');
+var send = require('./send');
 
-var app = express();
+module.exports = function queryTables (req, res, next) {
+	req.tableService.queryTables(function (error, result, response) {
+		send.errorElse(res, error, function () {
+			var tables = [];
+			for (var tbl in result) {
+				var table = result[tbl];
+				if (table.TableName) {
+					tables.push(table.TableName);
+				}
+			}
 
-app.set('port', process.env.PORT || 3000);
-app.use(express.logger('dev'));
-app.use(express.bodyParser());
-app.use(express.methodOverride());
-app.use(app.router);
-app.use(express.static(path.join(__dirname, 'public')));
-
-if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+			send.content(res, {
+				tables: tables,
+				name: req.tableService.storageAccount,
+			}, 'result');
+		})
+	});
 }
-
-app.use('/json', require('./routes/json'));
-
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
-});

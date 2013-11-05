@@ -14,25 +14,21 @@
 // limitations under the License.
 //
 
-var express = require('express')
-  , http = require('http')
-  , path = require('path');
+var   send = require('./send');
 
-var app = express();
+module.exports = function deleteRow (req, res, next) {
+	var rowKey = req.params.rowKey;
+	var partitionKey = req.params.partitionKey;
+	var tableName = req.params.tableName;
 
-app.set('port', process.env.PORT || 3000);
-app.use(express.logger('dev'));
-app.use(express.bodyParser());
-app.use(express.methodOverride());
-app.use(app.router);
-app.use(express.static(path.join(__dirname, 'public')));
+	var entityDescriptor = {
+		PartitionKey: partitionKey,
+		RowKey: rowKey
+	};
 
-if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+	req.tableService.deleteEntity(tableName, entityDescriptor, function (error, entity, response) {
+		send.errorElse(res, error, function () {
+			send.content(res, response, 'response');
+		});
+	});
 }
-
-app.use('/json', require('./routes/json'));
-
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
-});

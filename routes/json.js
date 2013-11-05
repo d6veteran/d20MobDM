@@ -14,25 +14,18 @@
 // limitations under the License.
 //
 
-var express = require('express')
-  , http = require('http')
-  , path = require('path');
+var   express = require('express')
+    , app = module.exports = express()
+    , azure = require('azure')
 
-var app = express();
+    , queryTables = require('./json/queryTables')
+    , queryTable = require('./json/queryTable')
+    , deleteRow = require('./json/deleteRow')
 
-app.set('port', process.env.PORT || 3000);
-app.use(express.logger('dev'));
-app.use(express.bodyParser());
-app.use(express.methodOverride());
-app.use(app.router);
-app.use(express.static(path.join(__dirname, 'public')));
+    , tableServiceMiddleware = require('./json/tableServiceMiddleware');
 
-if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
-}
+app.use(tableServiceMiddleware);
 
-app.use('/json', require('./routes/json'));
-
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
-});
+app.get('/table', queryTables);
+app.get('/table/:tableName', queryTable);
+app.delete('/table/:tableName/:partitionKey/:rowKey', deleteRow);

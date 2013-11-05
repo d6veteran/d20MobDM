@@ -14,25 +14,29 @@
 // limitations under the License.
 //
 
-var express = require('express')
-  , http = require('http')
-  , path = require('path');
+module.exports = {
+	errorElse: function sendErrorElse(res, error, callback) {
+		if (error === undefined || error == null) {
+			callback();
+		} else {
+			res.json({
+				ok: false,
+				error: error
+			});
+		}
+	},
 
-var app = express();
+	send: function send(res, error, content, contentName) {
+		sendErrorElse(res, error, function () {
+			sendContent(res, content, contentName);
+		});
+	},
 
-app.set('port', process.env.PORT || 3000);
-app.use(express.logger('dev'));
-app.use(express.bodyParser());
-app.use(express.methodOverride());
-app.use(app.router);
-app.use(express.static(path.join(__dirname, 'public')));
-
-if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+	content: function sendContent(res, content, contentName) {
+		var result = {
+			ok: true
+		};
+		result[contentName || 'content'] = content;
+		res.json(result);
+	}
 }
-
-app.use('/json', require('./routes/json'));
-
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
-});
