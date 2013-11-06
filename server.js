@@ -16,7 +16,8 @@
 
 var express = require('express')
   , http = require('http')
-  , path = require('path');
+  , path = require('path')
+  , azure = require('azure');
 
 var app = express();
 
@@ -26,6 +27,8 @@ app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
+
+
 
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());

@@ -30,6 +30,14 @@ module.exports = function getTableServiceInstance(req, res, next) {
 
 	try {
 		req.tableService = azure.createTableService(account, key);
+
+	tableService.createTableIfNotExists('mytable', function(error){
+    	if(!error){
+        	console.log
+    	}
+	});
+
+
 	}
 	catch (err) {
 		return res.send(403);
